@@ -1,0 +1,33 @@
+version: '3.9'
+services:
+
+  backend:
+    container_name: Django_backend
+    build: ./
+    working_dir: /app/music_catalog/
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    restart: always
+    ports:
+      - 8000:8000
+    depends_on:
+      db:
+        condition: service_healthy
+  
+  db:
+    container_name: Database_mysql
+    image: mysql:8.0
+    ports:
+      - 13306:3306
+    volumes:
+      - database:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: 'music_catalog'
+      MYSQL_ROOT_PASSWORD: 'root'
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 20
+  
+volumes:
+  database:
+    
